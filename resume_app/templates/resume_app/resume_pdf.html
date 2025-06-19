@@ -1,0 +1,128 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>{{ name }}'s Resume</title>
+    
+    <style>
+        /* General styles */
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            font-size: 11pt;
+            line-height: 1.5;
+        }
+        h1 {
+            font-size: 20pt;
+            margin-bottom: 15px;
+            letter-spacing: 0.5px;
+            text-align: left;
+        }
+        .job-title {
+            font-size: 16pt;
+            color: #333;
+            font-weight: normal;
+        }
+        h2, h3 {
+            font-size: 12pt;
+            margin-top: 15px;
+            margin-bottom: 3px;
+            color: #333;
+        }
+        .section p {
+            margin: 0;
+            padding: 0;
+            line-height: 1.5;
+            font-size: 11pt;
+        }
+        .skills-list, .certifications-list {
+            list-style-type: disc;
+            padding-left: 20px;
+        }
+        .skills-list li, .certifications-list li {
+            margin-bottom: 5px;
+            font-size: 10pt;
+        }
+    </style>
+</head>
+<body>
+
+    <!-- Name and job title -->
+    <h1>{{ name }} | <span class="job-title">{{ job_title }}</span></h1>
+
+    <!-- Contact information -->
+    <div class="contact-info">
+        <p>{% if linkedin %}<a href="{{ linkedin }}">LinkedIn</a>{% endif %} | {{ email }} | {{ phone }} | {{ city }}</p>
+    </div>
+
+    <!-- Professional Summary -->
+    <div class="section">
+        <h3>Professional Summary</h3>
+        <p>{{ professional_summary }}</p>
+    </div>
+
+    <!-- Key Skills and Accomplishments -->
+    <div class="section">
+        <h3>LiveOps Consultant - Teleservice Analytics</h3>
+        <div class="date">March 2016 - March 2024(contract ended)</div>
+        <ul class="responsibilities-bullets">
+            {% for responsibility in responsibilities %}
+                <li>{{ responsibility }}</li>
+            {% endfor %}
+        </ul>
+    </div>
+
+    <!-- Education Section -->
+    <div class="section">
+        <h2>Education</h2>
+        <ul class="education-list">
+            {% for school, degree, start_date, end_date in education %}
+                <li>
+                    <p class="education-school">{{ school }}</p>
+                    <p class="education-degree">{{ degree }}</p>
+                    <p class="education-dates">{{ start_date }} - {{ end_date }}</p>
+                </li>
+            {% endfor %}
+        </ul>
+    </div>
+
+    <!-- Certifications and Skills -->
+    <div class="section skills-certifications">
+        <div class="skills-column">
+            <h3>Skills</h3>
+            <ul class="skills-list">
+                {% for skill in skills %}
+                    <li>{{ skill }}</li>
+                {% endfor %}
+            </ul>
+        </div>
+        <div class="certifications-column">
+            <h3>Certifications</h3>
+            <ul class="certifications-list">
+                {% for cert in certifications %}
+                    <li>{{ cert }}</li>
+                {% endfor %}
+            </ul>
+        </div>
+    </div>
+
+    <form method="POST" action="{% url 'generate_pdf' %}">
+        {% csrf_token %}
+        <input type="hidden" name="name" value="{{ name }}">
+        <input type="hidden" name="job_title" value="{{ job_title }}">
+        <input type="hidden" name="linkedin" value="{{ linkedin }}">
+        <input type="hidden" name="email" value="{{ email }}">
+        <input type="hidden" name="phone" value="{{ phone }}">
+        <input type="hidden" name="city" value="{{ city }}">
+        <input type="hidden" name="professional_summary" value="{{ professional_summary }}">
+        <input type="hidden" name="responsibilities" value="{{ responsibilities|join:'|' }}">
+        <input type="hidden" name="certifications" value="{{ certifications|join:',' }}">
+        <input type="hidden" name="education" value="{% for edu in education %}{{ edu|join:'~~' }}|{% endfor %}">
+        <input type="hidden" name="skills" value="{{ skills|join:',' }}">
+        <button type="submit">Download PDF</button>
+    </form>
+
+</body>
+</html>

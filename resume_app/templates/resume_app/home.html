@@ -1,0 +1,135 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="{% static 'css/styles.css' %}">
+    <title>Resume Builder</title>
+</head>
+<body>
+
+    <div class="form-container">
+        <h1>Resume Builder</h1>
+
+        <form method="POST" action="{% url 'home' %}">
+            {% csrf_token %}
+
+            <!-- Name and Contact Information -->
+            <div class="form-row">
+                <label for="name">Name:</label>
+                <input type="text" id="name" name="name" required>
+            </div>
+
+            <div class="form-row">
+                <label for="job_title">Job Title:</label>
+                <input type="text" id="job_title" name="job_title" placeholder="Program Analyst" required>
+            </div>
+
+            <div class="form-row">
+                <label for="linkedin">LinkedIn Profile:</label>
+                <input type="url" id="linkedin" name="linkedin" placeholder="https://linkedin.com/in/yourprofile">
+            </div>
+
+            <div class="form-row">
+                <label for="email">Email:</label>
+                <input type="email" id="email" name="email" placeholder="email@example.com" required>
+            </div>
+
+            <div class="form-row">
+                <label for="phone">Phone:</label>
+                <input type="tel" id="phone" name="phone" placeholder="123-456-7890" required>
+            </div>
+
+            <div class="form-row">
+                <label for="city">City:</label>
+                <input type="text" id="city" name="city" placeholder="City, State" required>
+            </div>
+
+            <!-- Job A: User's Experience -->
+            <div class="form-row">
+                <label for="job_a">Your Experience (Job A):</label>
+                <textarea id="job_a" name="job_a" placeholder="Describe your job responsibilities and experience here..." required></textarea>
+            </div>
+
+            <!-- Job B: Target Job Description -->
+            <div class="form-row">
+                <label for="job_b">Job Description Requirements (Job B):</label>
+                <textarea id="job_b" name="job_b" placeholder="Paste the target job description here..." required></textarea>
+            </div>
+
+            <h3>Certifications</h3>
+            <div id="certifications-container">
+                <input type="text" name="certifications[]" placeholder="Certification 1">
+                <input type="text" name="certifications[]" placeholder="Certification 2">
+                <input type="text" name="certifications[]" placeholder="Certification 3">
+            </div>
+            <button type="button" onclick="addCertification()">Add Another Certification</button>
+            
+            <script>
+                function addCertification() {
+                    const container = document.getElementById('certifications-container');
+                    const input = document.createElement('input');
+                    input.type = 'text';
+                    input.name = 'certifications[]';
+                    input.placeholder = 'New Certification';
+                    container.appendChild(input);
+                }
+            </script>
+            
+
+            <!-- Education -->
+            <h2>Education</h2>
+            <div id="education-section">
+                <div class="education-entry">
+                    <label for="school">School:</label>
+                    <input type="text" id="school" name="school[]" placeholder="University Name" required>
+
+                    <label for="degree">Degree:</label>
+                    <input type="text" id="degree" name="degree[]" placeholder="Degree Title" required>
+
+                    <label for="start_date">Start Date:</label>
+                    <input type="date" id="start_date" name="start_date[]" required>
+
+                    <label for="end_date">End Date:</label>
+                    <input type="date" id="end_date" name="end_date[]" required>
+                </div>
+            </div>
+            <button type="button" id="add-education">Add Another Education</button>
+
+            <!-- Skills -->
+            <div class="form-row">
+                <label for="skills">Skills:</label>
+                <textarea id="skills" name="skills" placeholder="Python, R, SQL, Tableau, Salesforce, etc." required></textarea>
+            </div>
+
+            <br><br>
+            <input type="submit" value="Generate Resume">
+        </form>
+
+    </div>
+
+    <script>
+        document.getElementById('add-education').addEventListener('click', function() {
+            var educationSection = document.getElementById('education-section');
+            var newEntry = document.createElement('div');
+            newEntry.classList.add('education-entry');
+            newEntry.innerHTML = `
+                <label for="school">School:</label>
+                <input type="text" id="school" name="school[]" placeholder="University Name" required>
+
+                <label for="degree">Degree:</label>
+                <input type="text" id="degree" name="degree[]" placeholder="Degree Title" required>
+
+                <label for="start_date">Start Date:</label>
+                <input type="date" id="start_date" name="start_date[]" required>
+
+                <label for="end_date">End Date:</label>
+                <input type="date" id="end_date" name="end_date[]" required>
+            `;
+            educationSection.appendChild(newEntry);
+        });
+    </script>
+
+</body>
+</html>
