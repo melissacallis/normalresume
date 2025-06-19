@@ -128,9 +128,9 @@ def home(request):
         }
 
         # Render output.html
-        return render(request, 'transferx/output.html', context)
+        return render(request, 'resume_app/output.html', context)
 
-    return render(request, 'transferx/home.html')
+    return render(request, 'resume_app/home.html')
 
 
 
@@ -159,7 +159,7 @@ def generate_pdf(request):
         print("Certifications in generate_pdf:", context['certifications'])
 
         # Render PDF
-        html_string = render_to_string('transferx/resume_pdf.html', context)
+        html_string = render_to_string('resume_app/resume_pdf.html', context)
 
         # Generate the PDF
         response = HttpResponse(content_type='application/pdf')
@@ -225,7 +225,7 @@ def load_edit_resume(request):
         }
 
         # Render the edit_resume.html template with the pre-filled data
-        return render(request, 'transferx/edit_resume.html', context)
+        return render(request, 'resume_app/edit_resume.html', context)
 
     # If not a POST request, redirect to the home page or handle accordingly
     return redirect('home')
