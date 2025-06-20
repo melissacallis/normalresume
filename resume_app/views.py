@@ -20,15 +20,17 @@ import re
 import os
 from dotenv import load_dotenv
 
-# Configure the Gemini API key
-gemini_api_key = os.environ.get("GEMINI_API_KEY")
-configure(api_key=gemini_api_key)
+load_dotenv()  # this reads .env into os.environ
 
-# Set the API key from environment variables
-GEMINI_API_KEY = os.getenv('GEMINI_API_KEY')
+API_KEY = os.getenv("GOOGLE_API_KEY")
+if not API_KEY:
+    raise RuntimeError("GOOGLE_API_KEY not set in environment")
 
-# Create the Gemini model instance
-model = GenerativeModel('gemini-2.0-flash')
+# Use client-based initialization instead of genai.configure
+from google import genai
+client = genai.Client(api_key=API_KEY)
+model = client.models.get(model="gemini-2.0-flash")
+
 
 def generate_job_c(job_a, job_b):
     prompt = f"""
@@ -70,14 +72,12 @@ Make sure the output format strictly follows this structure:
 Ensure that both sections are distinct and follow the format above. No other structure should be included.
     """
 
-    response = model.generate_content(prompt)
-    
-    # Debugging output to check structure in terminal
-    print(response.text)
-    
-    
-
-    
+    # Use client.models.generate_content instead of outdated method
+    response = client.models.generate_content(
+        model="gemini-2.0-flash",
+        contents=prompt
+    )
+    print(response.text)  # useful for debugging in logs
     return response.text
 
 # Assuming the generate_job_c function is in a file called job_generation.py
