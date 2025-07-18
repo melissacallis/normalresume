@@ -1,0 +1,105 @@
+
+/* General styles */
+body {
+    font-family: Arial, sans-serif;
+    background-color: #e4e1b5;
+    margin: 0;
+    padding: 0;
+}
+
+/* Form container */
+.form-container {
+    width: 80%;
+    max-width: 800px;
+    margin: 40px auto;
+    padding: 20px;
+    background-color: #fff;
+    border-radius: 8px;
+    box-sizing: border-box;
+}
+
+/* Label styles */
+label {
+    display: block;
+    margin-bottom: 5px;
+    font-weight: bold;
+    font-size: 12px;
+}
+
+/* Input and textarea styles */
+input[type="text"],
+input[type="email"],
+input[type="tel"],
+input[type="url"],
+input[type="date"],
+input[type="phone"],
+input[type="city"],
+
+textarea {
+    width: 80%;
+    height: 70%; /* Ensure all input fields take full width */
+    max-width: 100%;
+    box-sizing: border-box; /* Include padding and borders in width */
+    margin-bottom: 15px;
+    padding: 10px;
+    font-size: 16px;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+}
+
+/* Consistent alignment for form fields */
+.form-row {
+    display: flex;
+    flex-wrap: wrap;
+    margin-bottom: 15px;
+}
+
+.form-row label {
+    flex: 0 0 20%; /* Labels take up 20% of the row */
+    padding-right: 10px;
+    box-sizing: border-box;
+}
+
+.form-row input,
+.form-row textarea {
+    flex: 1; /* Input fields take up the remaining space */
+}
+
+/* Submit button styles */
+input[type="submit"] {
+    padding: 12px 20px;
+    font-size: 18px;
+    cursor: pointer;
+    background-color: #4CAF50; /* Button color */
+    color: white;
+    border: none;
+    border-radius: 4px;
+    width: 100%;
+}
+
+/* Hover effect for the submit button */
+input[type="submit"]:hover {
+    background-color: #45a049;
+}
+
+/* Education container */
+.education-list {
+    list-style-type: none;
+    padding-left: 0;
+    margin: 0;
+}
+
+.education-item {
+    margin-bottom: 5px;
+}
+
+.education-row {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: space-between;
+}
+
+.education-entry label,
+.education-entry input {
+    width: 80%; /* Full width for labels and inputs */
+}
