@@ -55,6 +55,7 @@ Instructions:
 7. **Keep it real**: Stay true to what the person really did in Job A. If Job B mentions tasks that are way more advanced, simplify them to match what the person actually did.  
 8. **Simplify advanced stuff**: If Job B talks about leading a big team but Job A only involves working with small groups or alone, make sure to reflect that difference.  
 9. **Use easy language**: Rewrite the descriptions of Job A and Job B so they sound simple and easy to understand, like a high school student wrote them.
+10. **Limit the bullet points**: Only include **five (5)** bullet points under **Key Skills and Accomplishments**. Choose the five most relevant or impressive ones based on Job B.
 
 Make sure the output format strictly follows this structure:
 
@@ -67,7 +68,8 @@ Make sure the output format strictly follows this structure:
 - [Skill or accomplishment 1]
 - [Skill or accomplishment 2]
 - [Skill or accomplishment 3]
-[...]
+- [Skill or accomplishment 4]
+- [Skill or accomplishment 5]
 
 Ensure that both sections are distinct and follow the format above. No other structure should be included.
     """

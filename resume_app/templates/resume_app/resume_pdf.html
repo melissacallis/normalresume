@@ -45,6 +45,18 @@
             margin-bottom: 5px;
             font-size: 10pt;
         }
+
+        .skills-certifications {
+    display: flex;
+    gap: 40px; /* space between the columns */
+    justify-content: space-between;
+    flex-wrap: wrap;
+}
+
+.skills-column, .certifications-column {
+    flex: 1;
+    min-width: 250px;
+}
     </style>
 </head>
 <body>
@@ -108,21 +120,7 @@
         </div>
     </div>
 
-    <form method="POST" action="{% url 'generate_pdf' %}">
-        {% csrf_token %}
-        <input type="hidden" name="name" value="{{ name }}">
-        <input type="hidden" name="job_title" value="{{ job_title }}">
-        <input type="hidden" name="linkedin" value="{{ linkedin }}">
-        <input type="hidden" name="email" value="{{ email }}">
-        <input type="hidden" name="phone" value="{{ phone }}">
-        <input type="hidden" name="city" value="{{ city }}">
-        <input type="hidden" name="professional_summary" value="{{ professional_summary }}">
-        <input type="hidden" name="responsibilities" value="{{ responsibilities|join:'|' }}">
-        <input type="hidden" name="certifications" value="{{ certifications|join:',' }}">
-        <input type="hidden" name="education" value="{% for edu in education %}{{ edu|join:'~~' }}|{% endfor %}">
-        <input type="hidden" name="skills" value="{{ skills|join:',' }}">
-        <button type="submit">Download PDF</button>
-    </form>
+
 
 </body>
 </html>
