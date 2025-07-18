@@ -61,7 +61,7 @@ Make sure the output format strictly follows this structure:
 
 **Professional Summary:**
 
-[The professional summary as a single paragraph in first person]
+[The professional summary as a single paragraph in first person with approximately 100 words]
 
 **Key Skills and Accomplishments:**
 
