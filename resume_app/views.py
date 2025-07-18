@@ -56,6 +56,7 @@ Instructions:
 8. **Simplify advanced stuff**: If Job B talks about leading a big team but Job A only involves working with small groups or alone, make sure to reflect that difference.  
 9. **Use easy language**: Rewrite the descriptions of Job A and Job B so they sound simple and easy to understand, like a high school student wrote them.
 10. **Limit the bullet points**: Only include **five (5)** bullet points under **Key Skills and Accomplishments**. Choose the five most relevant or impressive ones based on Job B.
+11. **Do not mention managing staff or managing experience**
 
 Make sure the output format strictly follows this structure:
 
