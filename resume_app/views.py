@@ -29,7 +29,7 @@ if not API_KEY:
 # Use client-based initialization instead of genai.configure
 from google import genai
 client = genai.Client(api_key=API_KEY)
-model = client.models.get(model="gemini-2.0-flash")
+model = client.models.get(model="gemini-2.5-flash")
 
 
 def generate_job_c(job_a, job_b):
@@ -77,7 +77,7 @@ Ensure that both sections are distinct and follow the format above. No other str
 
     # Use client.models.generate_content instead of outdated method
     response = client.models.generate_content(
-        model="gemini-2.0-flash",
+        model="gemini-2.5-flash",
         contents=prompt
     )
     print(response.text)  # useful for debugging in logs
