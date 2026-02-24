@@ -32,116 +32,82 @@ client = genai.Client(api_key=API_KEY)
 model = client.models.get(model="gemini-2.5-flash")
 
 
-def generate_job_c(job_a, job_b):
+def generate_job_c(job_1, job_2, target_job):
     prompt = f"""
 You are an assistant helping transform a user's resume to align with a job description. 
 
-The user's current experience (Job A) is:
+The user's FIRST past experience (Job 1) is:
+'{job_1}'
 
-'{job_a}'
+The user's SECOND past experience (Job 2) is:
+'{job_2}'
 
-The target job description (Job B) is:
-
-'{job_b}'
+The target job description (Target Job) is:
+'{target_job}'
 
 Instructions:
+1. Don't copy: Don't use the Target Job word-for-word, except for technical terms.
+2. Reword: Reword Job 1 and Job 2 to match the Target Job's needs, staying honest to what the person actually did.
+3. Professional Summary: Generate a single 3-sentence summary based on both jobs to match the Target Job.
+4. Job 1: Generate exactly 5 tailored bullet points for Job 1.
+5. Job 2: Generate exactly 5 tailored bullet points for Job 2.
+6. No Management: Do not mention managing staff.
 
-1. **Don’t copy**: Don’t use any parts of Job B word-for-word, except for technical terms or job titles.  
-2. **Be honest**: Don’t make up any new skills or experience that aren’t already listed in Job A. Just focus on making their existing experience sound closer to Job B. 
-3. **Reword**: Take what Job B asks for and reword what the person has done in Job A to match it.  
-4. **Make it sound better**: Adjust the skills and tasks from Job A to match about 80% of what Job B wants. Use fancy words or industry terms from Job B where it makes sense.  
-5. **Professional Summary**: Start with a 3 sentence paragraph about the person’s skills, accomplishments, and goals. This should be based on Job A but written to match what Job B is asking for. 
-6. **Key Skills and Accomplishments**: After the summary, make a section called **'Key Skills and Accomplishments'** with bullet points. Each point should list something the person did in Job A, but make it sound like it fits Job B.  
-7. **Keep it real**: Stay true to what the person really did in Job A. If Job B mentions tasks that are way more advanced, simplify them to match what the person actually did.  
-8. **Simplify advanced stuff**: If Job B talks about leading a big team but Job A only involves working with small groups or alone, make sure to reflect that difference.  
-9. **Use easy language**: Rewrite the descriptions of Job A and Job B so they sound simple and easy to understand, like a high school student wrote them.
-10. **Limit the bullet points**: Only include **five (5)** bullet points under **Key Skills and Accomplishments**. Choose the five most relevant or impressive ones based on Job B.
-11. **Do not mention managing staff or managing experience**
-
-Make sure the output format strictly follows this structure:
+Strictly use this exact format with these exact headers:
 
 **Professional Summary:**
+[Insert summary here]
 
-[The professional summary as a single paragraph in first person with approximately 100 words]
+**Job 1:**
+- [Job 1 bullet]
+- [Job 1 bullet]
+- [Job 1 bullet]
+- [Job 1 bullet]
+- [Job 1 bullet]
 
-**Key Skills and Accomplishments:**
+**Job 2:**
+- [Job 2 bullet]
+- [Job 2 bullet]
+- [Job 2 bullet]
+- [Job 2 bullet]
+- [Job 2 bullet]
+"""
 
-- [Skill or accomplishment 1]
-- [Skill or accomplishment 2]
-- [Skill or accomplishment 3]
-- [Skill or accomplishment 4]
-- [Skill or accomplishment 5]
-
-Ensure that both sections are distinct and follow the format above. No other structure should be included.
-    """
-
-    # Use client.models.generate_content instead of outdated method
     response = client.models.generate_content(
         model="gemini-2.5-flash",
         contents=prompt
     )
-    print(response.text)  # useful for debugging in logs
     return response.text
 
-# Assuming the generate_job_c function is in a file called job_generation.py
+def parse_job_c_output(job_c_output):
+    if not job_c_output:
+        return "", [], []
+
+    professional_summary = ""
+    responsibilities_1 = []
+    responsibilities_2 = []
+
+    try:
+        parts = job_c_output.split("**Job 1:**")
+        if len(parts) == 2:
+            professional_summary = parts[0].replace("**Professional Summary:**", "").strip()
+            
+            job_parts = parts[1].split("**Job 2:**")
+            if len(job_parts) == 2:
+                job_1_text = job_parts[0].strip()
+                job_2_text = job_parts[1].strip()
+                
+                responsibilities_1 = [resp.strip('- ') for resp in job_1_text.split('\n') if resp.strip()]
+                responsibilities_2 = [resp.strip('- ') for resp in job_2_text.split('\n') if resp.strip()]
+    except Exception as e:
+        print("Warning: Unexpected Gemini output format.", e)
+        
+    return professional_summary, responsibilities_1, responsibilities_2
+
 @csrf_exempt
 def home(request):
     if request.method == 'POST':
-        # Collect and process form data
-        name = request.POST.get('name', '')
-        job_title = request.POST.get('job_title', '')
-        linkedin = request.POST.get('linkedin', '')
-        email = request.POST.get('email', '')
-        phone = request.POST.get('phone', '')
-        city = request.POST.get('city', '')
-        job_a = request.POST.get('job_a', '')
-        job_b = request.POST.get('job_b', '')
-
-        # Retrieve certifications as a list
-        certifications = request.POST.getlist('certifications[]', [])
-        certifications = [cert.strip() for cert in certifications if cert.strip()]
-
-        # Education processing
-        schools = request.POST.getlist('school[]', [])
-        degrees = request.POST.getlist('degree[]', [])
-        start_dates = request.POST.getlist('start_date[]', [])
-        end_dates = request.POST.getlist('end_date[]', [])
-        education = list(zip(schools, degrees, start_dates, end_dates))
-
-        # Skills
-        skills = request.POST.get('skills', '').split(',')
-
-        # Responsibilities and job content generation
-        job_c_output = generate_job_c(job_a, job_b)
-        professional_summary, responsibilities = parse_job_c_output(job_c_output)
-
-        # Prepare context
-        context = {
-            'name': name,
-            'job_title': job_title,
-            'linkedin': linkedin,
-            'email': email,
-            'phone': phone,
-            'city': city,
-            'professional_summary': professional_summary,
-            'responsibilities': responsibilities,
-            'certifications': certifications,  # Certifications as a list
-            'education': education,  # Education as a list of tuples
-            'skills': skills,  # Skills as a list
-        }
-
-        # Render output.html
-        return render(request, 'resume_app/output.html', context)
-
-    return render(request, 'resume_app/home.html')
-
-
-
-
-@csrf_exempt
-def generate_pdf(request):
-    if request.method == 'POST':
-        # Retrieve context from POST
+        # Prepare context with standard fields AND the new Job 1 and Job 2 fields
         context = {
             'name': request.POST.get('name', ''),
             'job_title': request.POST.get('job_title', ''),
@@ -149,86 +115,99 @@ def generate_pdf(request):
             'email': request.POST.get('email', ''),
             'phone': request.POST.get('phone', ''),
             'city': request.POST.get('city', ''),
-            'professional_summary': request.POST.get('professional_summary', ''),
-            'responsibilities': request.POST.get('responsibilities', '').split('|'),
-            'education': [
-                tuple(edu.split('~~')) for edu in request.POST.get('education', '').split('|') if edu.strip()
-            ],
-            'certifications': request.POST.get('certifications', '').split(','),  # Processed as a list
+            
+            'job_1_title': request.POST.get('job_1_title', ''),
+            'job_1_company': request.POST.get('job_1_company', ''),
+            'job_1_dates': request.POST.get('job_1_dates', ''),
+            
+            'job_2_title': request.POST.get('job_2_title', ''),
+            'job_2_company': request.POST.get('job_2_company', ''),
+            'job_2_dates': request.POST.get('job_2_dates', ''),
+            
+            'certifications': [cert.strip() for cert in request.POST.getlist('certifications[]', []) if cert.strip()],
+            'education': list(zip(request.POST.getlist('school[]', []), request.POST.getlist('degree[]', []), request.POST.getlist('start_date[]', []), request.POST.getlist('end_date[]', []))),
             'skills': request.POST.get('skills', '').split(','),
         }
 
-        # Debugging certifications
-        print("Certifications in generate_pdf:", context['certifications'])
+        # Grab the duties and the target job description to send to the AI
+        job_1_duties = request.POST.get('job_1_duties', '')
+        job_2_duties = request.POST.get('job_2_duties', '')
+        job_b = request.POST.get('job_b', '')
 
-        # Render PDF
+        # Generate the AI content
+        job_c_output = generate_job_c(job_1_duties, job_2_duties, job_b)
+        professional_summary, responsibilities_1, responsibilities_2 = parse_job_c_output(job_c_output)
+
+        # Add the AI generated results to the context
+        context['professional_summary'] = professional_summary
+        context['responsibilities_1'] = responsibilities_1
+        context['responsibilities_2'] = responsibilities_2
+
+        return render(request, 'resume_app/output.html', context)
+
+    return render(request, 'resume_app/home.html')
+
+@csrf_exempt
+def generate_pdf(request):
+    if request.method == 'POST':
+        context = {
+            'name': request.POST.get('name', ''),
+            'job_title': request.POST.get('job_title', ''),
+            'linkedin': request.POST.get('linkedin', ''),
+            'email': request.POST.get('email', ''),
+            'phone': request.POST.get('phone', ''),
+            'city': request.POST.get('city', ''),
+            
+            'job_1_title': request.POST.get('job_1_title', ''),
+            'job_1_company': request.POST.get('job_1_company', ''),
+            'job_1_dates': request.POST.get('job_1_dates', ''),
+            'responsibilities_1': request.POST.get('responsibilities_1', '').split('|'),
+            
+            'job_2_title': request.POST.get('job_2_title', ''),
+            'job_2_company': request.POST.get('job_2_company', ''),
+            'job_2_dates': request.POST.get('job_2_dates', ''),
+            'responsibilities_2': request.POST.get('responsibilities_2', '').split('|'),
+            
+            'professional_summary': request.POST.get('professional_summary', ''),
+            'education': [tuple(edu.split('~~')) for edu in request.POST.get('education', '').split('|') if edu.strip()],
+            'certifications': request.POST.get('certifications', '').split(','),
+            'skills': request.POST.get('skills', '').split(','),
+        }
+
         html_string = render_to_string('resume_app/resume_pdf.html', context)
-
-        # Generate the PDF
         response = HttpResponse(content_type='application/pdf')
         response['Content-Disposition'] = f'attachment; filename="{context["name"]}_Resume.pdf"'
         HTML(string=html_string).write_pdf(response)
-
         return response
 
     return redirect('home')
 
-def parse_job_c_output(job_c_output):
-    if not job_c_output:
-        return "", []  # Return empty values if there's no content
-
-    # Use a flexible regex to split the text into the two main sections
-    # Capture both "Professional Summary" and "Key Skills and Accomplishments" in separate groups
-    match = re.search(r'\*\*Professional Summary:\*\*(.*?)\*\*Key Skills and Accomplishments:\*\*(.*)', job_c_output, re.DOTALL)
-
-    if match:
-        # Extract the professional summary and responsibilities sections
-        professional_summary = match.group(1).strip()  # Group 1 is the professional summary text
-        responsibilities_section = match.group(2).strip()  # Group 2 is the key skills and accomplishments
-
-        # Split the responsibilities by newlines (each starting with a dash)
-        responsibilities = [resp.strip('- ') for resp in responsibilities_section.split('\n') if resp.strip() and resp.endswith('.')]
-
-        return professional_summary, responsibilities
-    else:
-        # If the structure is not as expected, log a warning for debugging
-        print("Warning: Unexpected Gemini output format.")
-        return "", []
-
-
 @csrf_exempt
 def load_edit_resume(request):
     if request.method == 'POST':
-        # Collect data sent from output.html
-        name = request.POST.get('name')
-        job_title = request.POST.get('job_title')
-        linkedin = request.POST.get('linkedin')
-        email = request.POST.get('email')
-        phone = request.POST.get('phone')
-        city = request.POST.get('city')
-        professional_summary = request.POST.get('professional_summary')
-        responsibilities = request.POST.get('responsibilities', '').split('|')
-        certifications = request.POST.get('certifications', '').split(',')
-        education = [tuple(edu.split('~~')) for edu in request.POST.get('education', '').split('|')]
-        skills = request.POST.get('skills', '').split(',')
-
-        # Prepare context with the data to be passed to the edit_resume.html template
         context = {
-            'name': name,
-            'job_title': job_title,
-            'linkedin': linkedin,
-            'email': email,
-            'phone': phone,
-            'city': city,
-            'professional_summary': professional_summary,
-            'responsibilities': responsibilities,
-            'certifications': certifications,
-            'education': education,
-            'skills': skills,
+            'name': request.POST.get('name', ''),
+            'job_title': request.POST.get('job_title', ''),
+            'linkedin': request.POST.get('linkedin', ''),
+            'email': request.POST.get('email', ''),
+            'phone': request.POST.get('phone', ''),
+            'city': request.POST.get('city', ''),
+            
+            'job_1_title': request.POST.get('job_1_title', ''),
+            'job_1_company': request.POST.get('job_1_company', ''),
+            'job_1_dates': request.POST.get('job_1_dates', ''),
+            'responsibilities_1': request.POST.get('responsibilities_1', '').split('|'),
+            
+            'job_2_title': request.POST.get('job_2_title', ''),
+            'job_2_company': request.POST.get('job_2_company', ''),
+            'job_2_dates': request.POST.get('job_2_dates', ''),
+            'responsibilities_2': request.POST.get('responsibilities_2', '').split('|'),
+            
+            'professional_summary': request.POST.get('professional_summary', ''),
+            'education': [tuple(edu.split('~~')) for edu in request.POST.get('education', '').split('|') if edu.strip()],
+            'certifications': request.POST.get('certifications', '').split(','),
+            'skills': request.POST.get('skills', '').split(','),
         }
-
-        # Render the edit_resume.html template with the pre-filled data
         return render(request, 'resume_app/edit_resume.html', context)
 
-    # If not a POST request, redirect to the home page or handle accordingly
     return redirect('home')

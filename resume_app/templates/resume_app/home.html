@@ -15,15 +15,14 @@
         <form method="POST" action="{% url 'home' %}">
             {% csrf_token %}
 
-            <!-- Name and Contact Information -->
             <div class="form-row">
                 <label for="name">Name:</label>
                 <input type="text" id="name" name="name" required>
             </div>
 
             <div class="form-row">
-                <label for="job_title">Job Title:</label>
-                <input type="text" id="job_title" name="job_title" placeholder="Program Analyst" required>
+                <label for="job_title">Target Job Title:</label>
+                <input type="text" id="job_title" name="job_title" placeholder="e.g., Data Analyst" required>
             </div>
 
             <div class="form-row">
@@ -46,17 +45,61 @@
                 <input type="text" id="city" name="city" placeholder="City, State" required>
             </div>
 
-            <!-- Job A: User's Experience -->
-            <div class="form-row">
-                <label for="job_a">Your Experience (Job A):</label>
-                <textarea id="job_a" name="job_a" placeholder="Describe your job responsibilities and experience here..." required></textarea>
+            <hr>
+            <h2>Professional Experience</h2>
+
+            <div id="job-1-section">
+                <h3>Current/Most Recent Job</h3>
+                <div class="form-row">
+                    <label>Job Title:</label>
+                    <input type="text" name="job_1_title" placeholder="e.g., Case Manager" required>
+                </div>
+                <div class="form-row">
+                    <label>Employer Name:</label>
+                    <input type="text" name="job_1_company" placeholder="e.g., General Hospital" required>
+                </div>
+                <div class="form-row">
+                    <label>Dates:</label>
+                    <input type="text" name="job_1_dates" placeholder="e.g., Jan 2024 - Present" required>
+                </div>
+                <div class="form-row">
+                    <label>Job Duties / Experience:</label>
+                    <textarea name="job_1_duties" rows="4" placeholder="Describe your responsibilities here..." required></textarea>
+                </div>
             </div>
 
-            <!-- Job B: Target Job Description -->
+            <div id="job-2-section" style="display: none;">
+                <hr>
+                <h3>Previous Job</h3>
+                <div class="form-row">
+                    <label>Job Title:</label>
+                    <input type="text" name="job_2_title" placeholder="e.g., Program Analyst">
+                </div>
+                <div class="form-row">
+                    <label>Employer Name:</label>
+                    <input type="text" name="job_2_company" placeholder="e.g., Tech Corp">
+                </div>
+                <div class="form-row">
+                    <label>Dates:</label>
+                    <input type="text" name="job_2_dates" placeholder="e.g., May 2021 - Dec 2023">
+                </div>
+                <div class="form-row">
+                    <label>Job Duties / Experience:</label>
+                    <textarea name="job_2_duties" rows="4" placeholder="Describe your responsibilities here..."></textarea>
+                </div>
+            </div>
+
+            <button type="button" id="add-job-btn" onclick="showSecondJob()" style="margin-bottom: 20px;">+ Add Another Job Experience</button>
+
+            <hr>
+
+            <h2>Target Job Details</h2>
             <div class="form-row">
                 <label for="job_b">Job Description Requirements (Job B):</label>
-                <textarea id="job_b" name="job_b" placeholder="Paste the target job description here..." required></textarea>
+                <textarea id="job_b" name="job_b" rows="6" placeholder="Paste the target job description here..." required></textarea>
             </div>
+
+            <hr>
 
             <h3>Certifications</h3>
             <div id="certifications-container">
@@ -66,19 +109,8 @@
             </div>
             <button type="button" onclick="addCertification()">Add Another Certification</button>
             
-            <script>
-                function addCertification() {
-                    const container = document.getElementById('certifications-container');
-                    const input = document.createElement('input');
-                    input.type = 'text';
-                    input.name = 'certifications[]';
-                    input.placeholder = 'New Certification';
-                    container.appendChild(input);
-                }
-            </script>
-            
+            <hr>
 
-            <!-- Education -->
             <h2>Education</h2>
             <div id="education-section">
                 <div class="education-entry">
@@ -97,24 +129,44 @@
             </div>
             <button type="button" id="add-education">Add Another Education</button>
 
-            <!-- Skills -->
+            <hr>
+
+            <h2>Skills</h2>
             <div class="form-row">
                 <label for="skills">Skills:</label>
-                <textarea id="skills" name="skills" placeholder="Python, R, SQL, Tableau, Salesforce, etc." required></textarea>
+                <textarea id="skills" name="skills" placeholder="Python, SQL, Healthcare Reporting, Salesforce, etc." required></textarea>
             </div>
 
             <br><br>
-            <input type="submit" value="Generate Resume">
+            <input type="submit" value="Generate Resume" style="font-size: 1.2em; padding: 10px 20px; background-color: #007BFF; color: white; border: none; cursor: pointer;">
         </form>
 
     </div>
 
     <script>
+        // Function to show the second job form
+        function showSecondJob() {
+            document.getElementById('job-2-section').style.display = 'block';
+            document.getElementById('add-job-btn').style.display = 'none'; // Hides the button after it is clicked
+        }
+
+        // Function to add certifications
+        function addCertification() {
+            const container = document.getElementById('certifications-container');
+            const input = document.createElement('input');
+            input.type = 'text';
+            input.name = 'certifications[]';
+            input.placeholder = 'New Certification';
+            container.appendChild(input);
+        }
+
+        // Function to add education
         document.getElementById('add-education').addEventListener('click', function() {
             var educationSection = document.getElementById('education-section');
             var newEntry = document.createElement('div');
             newEntry.classList.add('education-entry');
             newEntry.innerHTML = `
+                <hr style="border: 0; border-top: 1px dashed #ccc;">
                 <label for="school">School:</label>
                 <input type="text" id="school" name="school[]" placeholder="University Name" required>
 

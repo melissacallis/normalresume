@@ -45,42 +45,65 @@
             margin-bottom: 5px;
             font-size: 10pt;
         }
+        .job-block {
+            margin-bottom: 15px;
+        }
+        .job-header {
+            font-weight: bold;
+            font-size: 12pt;
+        }
+        .date {
+            font-style: italic;
+            color: #555;
+            margin-bottom: 5px;
+        }
     </style>
 </head>
 <body>
 
-    <!-- Name and job title -->
     <h1>{{ name }} | <span class="job-title">{{ job_title }}</span></h1>
 
-    <!-- Contact information -->
     <div class="contact-info">
         <p>{% if linkedin %}<a href="{{ linkedin }}">LinkedIn</a>{% endif %} | {{ email }} | {{ phone }} | {{ city }}</p>
     </div>
 
-    <!-- Professional Summary -->
     <div class="section">
         <h3>Professional Summary</h3>
         <p>{{ professional_summary }}</p>
     </div>
 
-    <!-- Key Skills and Accomplishments -->
     <div class="section">
-        <h3>LiveOps Consultant - Teleservice Analytics</h3>
-        <div class="date">March 2016 - March 2022 (contract ended)</div>
-        <ul class="responsibilities-bullets">
-            {% for responsibility in responsibilities %}
-                <li>{{ responsibility }}</li>
-            {% endfor %}
-        </ul>
+        <h2>Professional Experience</h2>
+
+        <div class="job-block">
+            <div class="job-header">{{ job_1_title }} | {{ job_1_company }}</div>
+            <div class="date">{{ job_1_dates }}</div>
+            <ul class="responsibilities-bullets">
+                {% for responsibility in responsibilities_1 %}
+                    <li>{{ responsibility }}</li>
+                {% endfor %}
+            </ul>
+        </div>
+
+        {% if job_2_title or responsibilities_2 %}
+        <div class="job-block">
+            <div class="job-header">{{ job_2_title }} | {{ job_2_company }}</div>
+            <div class="date">{{ job_2_dates }}</div>
+            <ul class="responsibilities-bullets">
+                {% for responsibility in responsibilities_2 %}
+                    <li>{{ responsibility }}</li>
+                {% endfor %}
+            </ul>
+        </div>
+        {% endif %}
     </div>
 
-    <!-- Education Section -->
     <div class="section">
         <h2>Education</h2>
         <ul class="education-list">
             {% for school, degree, start_date, end_date in education %}
                 <li>
-                    <p class="education-school">{{ school }}</p>
+                    <p class="education-school"><strong>{{ school }}</strong></p>
                     <p class="education-degree">{{ degree }}</p>
                     <p class="education-dates">{{ start_date }} - {{ end_date }}</p>
                 </li>
@@ -88,7 +111,6 @@
         </ul>
     </div>
 
-    <!-- Certifications and Skills -->
     <div class="section skills-certifications">
         <div class="skills-column">
             <h3>Skills</h3>
@@ -117,11 +139,22 @@
         <input type="hidden" name="phone" value="{{ phone }}">
         <input type="hidden" name="city" value="{{ city }}">
         <input type="hidden" name="professional_summary" value="{{ professional_summary }}">
-        <input type="hidden" name="responsibilities" value="{{ responsibilities|join:'|' }}">
+        
+        <input type="hidden" name="job_1_title" value="{{ job_1_title }}">
+        <input type="hidden" name="job_1_company" value="{{ job_1_company }}">
+        <input type="hidden" name="job_1_dates" value="{{ job_1_dates }}">
+        <input type="hidden" name="responsibilities_1" value="{{ responsibilities_1|join:'|' }}">
+        
+        <input type="hidden" name="job_2_title" value="{{ job_2_title }}">
+        <input type="hidden" name="job_2_company" value="{{ job_2_company }}">
+        <input type="hidden" name="job_2_dates" value="{{ job_2_dates }}">
+        <input type="hidden" name="responsibilities_2" value="{{ responsibilities_2|join:'|' }}">
+        
         <input type="hidden" name="certifications" value="{{ certifications|join:',' }}">
         <input type="hidden" name="education" value="{% for edu in education %}{{ edu|join:'~~' }}|{% endfor %}">
         <input type="hidden" name="skills" value="{{ skills|join:',' }}">
-        <button type="submit">Download PDF</button>
+        
+        <button type="submit" style="margin-top: 20px; padding: 10px 20px; background-color: #28a745; color: white; border: none; cursor: pointer;">Download PDF</button>
     </form>
 
 </body>
