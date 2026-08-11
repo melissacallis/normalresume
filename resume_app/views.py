@@ -79,6 +79,66 @@ Strictly use this exact format with these exact headers:
     )
     return response.text
 
+def generate_skills_match(skills, target_job):
+    prompt = f"""
+You are a career coach helping someone see how their real skills and experience line up with a target job. This is an honesty exercise, not a sales pitch: every item you produce must be something the person could truthfully defend if asked about it in an interview. Never invent a tool, certification, or experience they did not list.
+
+The person's skills and experience are:
+'{skills}'
+
+The target job description is:
+'{target_job}'
+
+Instructions:
+1. Direct Matches: List skills/tools the person already listed that also appear (or clearly correspond) in the target job description. Use the person's own wording.
+2. Transferable Skills: For real experience the person listed that isn't named the same way in the job description but genuinely applies, write one sentence each in the form "Your experience with [what they actually did] transfers to [what the job wants] because [true, specific reason]." Only use skills/experience actually listed — do not add new ones.
+3. Real Gaps: List things the target job asks for that the person's listed skills do not cover. Be direct and specific. Do not soften or omit real gaps.
+4. Stay grounded strictly in what was provided above. If a bucket has nothing to list, leave it empty rather than inventing content.
+
+Strictly use this exact format with these exact headers:
+
+**Direct Matches:**
+- [match]
+
+**Transferable Skills:**
+- [reframe]
+
+**Real Gaps:**
+- [gap]
+"""
+
+    response = client.models.generate_content(
+        model="gemini-2.5-flash",
+        contents=prompt
+    )
+    return response.text
+
+def parse_skills_match_output(skills_match_output):
+    if not skills_match_output:
+        return [], [], []
+
+    direct_matches = []
+    transferable_skills = []
+    real_gaps = []
+
+    try:
+        parts = skills_match_output.split("**Transferable Skills:**")
+        if len(parts) == 2:
+            direct_text = parts[0].replace("**Direct Matches:**", "").strip()
+            direct_matches = [line.strip('- ').strip() for line in direct_text.split('\n') if line.strip()]
+
+            gap_parts = parts[1].split("**Real Gaps:**")
+            if len(gap_parts) == 2:
+                transferable_text = gap_parts[0].strip()
+                gaps_text = gap_parts[1].strip()
+
+                transferable_skills = [line.strip('- ').strip() for line in transferable_text.split('\n') if line.strip()]
+                real_gaps = [line.strip('- ').strip() for line in gaps_text.split('\n') if line.strip()]
+    except Exception as e:
+        print("Warning: Unexpected Gemini output format for skills match.", e)
+
+    return direct_matches, transferable_skills, real_gaps
+
 def parse_job_c_output(job_c_output):
     if not job_c_output:
         return "", [], []
@@ -133,15 +193,22 @@ def home(request):
         job_1_duties = request.POST.get('job_1_duties', '')
         job_2_duties = request.POST.get('job_2_duties', '')
         job_b = request.POST.get('job_b', '')
+        skills_raw = request.POST.get('skills', '')
 
         # Generate the AI content
         job_c_output = generate_job_c(job_1_duties, job_2_duties, job_b)
         professional_summary, responsibilities_1, responsibilities_2 = parse_job_c_output(job_c_output)
 
+        skills_match_output = generate_skills_match(skills_raw, job_b)
+        direct_matches, transferable_skills, real_gaps = parse_skills_match_output(skills_match_output)
+
         # Add the AI generated results to the context
         context['professional_summary'] = professional_summary
         context['responsibilities_1'] = responsibilities_1
         context['responsibilities_2'] = responsibilities_2
+        context['direct_matches'] = direct_matches
+        context['transferable_skills'] = transferable_skills
+        context['real_gaps'] = real_gaps
 
         return render(request, 'resume_app/output.html', context)
 
