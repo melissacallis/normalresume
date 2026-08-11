@@ -67,9 +67,34 @@
             flex-wrap: wrap;
             gap: 0 25px;
         }
-        .skills-match-report h2 {
+        .skills-match-heading {
             width: 100%;
+            display: flex;
+            align-items: baseline;
+            justify-content: space-between;
+        }
+        .skills-match-heading h2 {
             margin-top: 0;
+        }
+        .skills-match-score {
+            font-size: 20pt;
+            font-weight: bold;
+            line-height: 1;
+        }
+        .skills-match-score-label {
+            font-size: 8pt;
+            font-weight: normal;
+            color: #555;
+            margin-left: 4px;
+        }
+        .score-high {
+            color: #1a7f37;
+        }
+        .score-mid {
+            color: #b98900;
+        }
+        .score-low {
+            color: #c0392b;
         }
         .skills-match-note {
             width: 100%;
@@ -105,7 +130,14 @@
     </div>
 
     <div class="skills-match-report">
-        <h2>Skills Match Report</h2>
+        <div class="skills-match-heading">
+            <h2>Skills Match Report</h2>
+            {% if match_percentage %}
+                <div class="skills-match-score {% if match_percentage >= 70 %}score-high{% elif match_percentage >= 40 %}score-mid{% else %}score-low{% endif %}">
+                    {{ match_percentage }}%<span class="skills-match-score-label">match</span>
+                </div>
+            {% endif %}
+        </div>
         <p class="skills-match-note">An honest comparison between your listed skills/experience and the target job. Nothing here is invented — the gaps are real too.</p>
 
         <div class="skills-match-column">

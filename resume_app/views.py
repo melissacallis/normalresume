@@ -90,12 +90,16 @@ The target job description is:
 '{target_job}'
 
 Instructions:
-1. Direct Matches: List skills/tools the person already listed that also appear (or clearly correspond) in the target job description. Use the person's own wording.
-2. Transferable Skills: For real experience the person listed that isn't named the same way in the job description but genuinely applies, write one sentence each in the form "Your experience with [what they actually did] transfers to [what the job wants] because [true, specific reason]." Only use skills/experience actually listed — do not add new ones.
-3. Real Gaps: List things the target job asks for that the person's listed skills do not cover. Be direct and specific. Do not soften or omit real gaps.
-4. Stay grounded strictly in what was provided above. If a bucket has nothing to list, leave it empty rather than inventing content.
+1. Match Percentage: First, identify the distinct key requirements/skills stated in the target job description. Then count how many of them are covered — either directly or transferably — by the person's listed skills/experience. Report coverage as a whole number percentage (0-100) of requirements covered. This must be a real count, not a vibe.
+2. Direct Matches: List skills/tools the person already listed that also appear (or clearly correspond) in the target job description. Use the person's own wording.
+3. Transferable Skills: For real experience the person listed that isn't named the same way in the job description but genuinely applies, write one sentence each in the form "Your experience with [what they actually did] transfers to [what the job wants] because [true, specific reason]." Only use skills/experience actually listed — do not add new ones.
+4. Real Gaps: List things the target job asks for that the person's listed skills do not cover. Be direct and specific. Do not soften or omit real gaps.
+5. Stay grounded strictly in what was provided above. If a bucket has nothing to list, leave it empty rather than inventing content.
 
 Strictly use this exact format with these exact headers:
+
+**Match Percentage:**
+[XX]%
 
 **Direct Matches:**
 - [match]
@@ -115,29 +119,37 @@ Strictly use this exact format with these exact headers:
 
 def parse_skills_match_output(skills_match_output):
     if not skills_match_output:
-        return [], [], []
+        return None, [], [], []
 
+    match_percentage = None
     direct_matches = []
     transferable_skills = []
     real_gaps = []
 
     try:
-        parts = skills_match_output.split("**Transferable Skills:**")
-        if len(parts) == 2:
-            direct_text = parts[0].replace("**Direct Matches:**", "").strip()
-            direct_matches = [line.strip('- ').strip() for line in direct_text.split('\n') if line.strip()]
+        percentage_parts = skills_match_output.split("**Direct Matches:**")
+        if len(percentage_parts) == 2:
+            percentage_text = percentage_parts[0].replace("**Match Percentage:**", "").strip()
+            digits = re.search(r'\d+', percentage_text)
+            if digits:
+                match_percentage = max(0, min(100, int(digits.group())))
 
-            gap_parts = parts[1].split("**Real Gaps:**")
-            if len(gap_parts) == 2:
-                transferable_text = gap_parts[0].strip()
-                gaps_text = gap_parts[1].strip()
+            parts = percentage_parts[1].split("**Transferable Skills:**")
+            if len(parts) == 2:
+                direct_text = parts[0].strip()
+                direct_matches = [line.strip('- ').strip() for line in direct_text.split('\n') if line.strip()]
 
-                transferable_skills = [line.strip('- ').strip() for line in transferable_text.split('\n') if line.strip()]
-                real_gaps = [line.strip('- ').strip() for line in gaps_text.split('\n') if line.strip()]
+                gap_parts = parts[1].split("**Real Gaps:**")
+                if len(gap_parts) == 2:
+                    transferable_text = gap_parts[0].strip()
+                    gaps_text = gap_parts[1].strip()
+
+                    transferable_skills = [line.strip('- ').strip() for line in transferable_text.split('\n') if line.strip()]
+                    real_gaps = [line.strip('- ').strip() for line in gaps_text.split('\n') if line.strip()]
     except Exception as e:
         print("Warning: Unexpected Gemini output format for skills match.", e)
 
-    return direct_matches, transferable_skills, real_gaps
+    return match_percentage, direct_matches, transferable_skills, real_gaps
 
 def parse_job_c_output(job_c_output):
     if not job_c_output:
@@ -200,12 +212,13 @@ def home(request):
         professional_summary, responsibilities_1, responsibilities_2 = parse_job_c_output(job_c_output)
 
         skills_match_output = generate_skills_match(skills_raw, job_b)
-        direct_matches, transferable_skills, real_gaps = parse_skills_match_output(skills_match_output)
+        match_percentage, direct_matches, transferable_skills, real_gaps = parse_skills_match_output(skills_match_output)
 
         # Add the AI generated results to the context
         context['professional_summary'] = professional_summary
         context['responsibilities_1'] = responsibilities_1
         context['responsibilities_2'] = responsibilities_2
+        context['match_percentage'] = match_percentage
         context['direct_matches'] = direct_matches
         context['transferable_skills'] = transferable_skills
         context['real_gaps'] = real_gaps
