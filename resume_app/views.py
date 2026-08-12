@@ -77,21 +77,25 @@ Strictly use this exact format with these exact headers:
     )
     return response.choices[0].message.content
 
-def generate_skills_match(skills, target_job):
+def generate_skills_match(skills, job_1_duties, job_2_duties, target_job):
     prompt = f"""
-You are a career coach helping someone see how their real skills and experience line up with a target job. This is an honesty exercise, not a sales pitch: every item you produce must be something the person could truthfully defend if asked about it in an interview. Never invent a tool, certification, or experience they did not list.
+You are a career coach helping someone see how their real skills and experience line up with a target job. This is an honesty exercise, not a sales pitch: every item you produce must be something the person could truthfully defend if asked about it in an interview. Never invent a tool, certification, or experience they did not describe.
 
-The person's skills and experience are:
+The person's listed skills are:
 '{skills}'
+
+The person's actual job duties, in their own words, are:
+Job 1: '{job_1_duties}'
+Job 2: '{job_2_duties}'
 
 The target job description is:
 '{target_job}'
 
 Instructions:
-1. Match Percentage: First, identify the distinct key requirements/skills stated in the target job description. Then count how many of them are covered — either directly or transferably — by the person's listed skills/experience. Report coverage as a whole number percentage (0-100) of requirements covered. This must be a real count, not a vibe.
-2. Direct Matches: List skills/tools the person already listed that also appear (or clearly correspond) in the target job description. Use the person's own wording.
-3. Transferable Skills: For real experience the person listed that isn't named the same way in the job description but genuinely applies, write one sentence each in the form "Your experience with [what they actually did] transfers to [what the job wants] because [true, specific reason]." Only use skills/experience actually listed — do not add new ones.
-4. Real Gaps: List things the target job asks for that the person's listed skills do not cover. Be direct and specific. Do not soften or omit real gaps.
+1. Match Percentage: First, identify the distinct key requirements/skills stated in the target job description. Then count how many of them are covered — either directly or transferably — by EVERYTHING above (the listed skills AND the described job duties, not just the skills list alone). Report coverage as a whole number percentage (0-100) of requirements covered. This must be a real count, not a vibe.
+2. Direct Matches: List skills/tools from the listed skills that also appear (or clearly correspond) in the target job description. Use the person's own wording.
+3. Transferable Skills: Look carefully at the job duties, not just the skills list — real work described there (e.g. reviewing case data for eligibility, resolving insurance/billing issues, coordinating documentation) very often maps onto job requirements even when worded differently. For each genuine match found in the duties, write one sentence in the form "Your experience with [what they actually did] transfers to [what the job wants] because [true, specific reason]." Only use skills/experience actually described above — do not add new ones.
+4. Real Gaps: List things the target job asks for that neither the listed skills nor the described job duties cover. Be direct and specific. Do not soften or omit real gaps, but do not list something as a gap if the duties above already demonstrate it.
 5. Stay grounded strictly in what was provided above. If a bucket has nothing to list, leave it empty rather than inventing content.
 
 Strictly use this exact format with these exact headers:
@@ -209,7 +213,7 @@ def home(request):
         job_c_output = generate_job_c(job_1_duties, job_2_duties, job_b)
         professional_summary, responsibilities_1, responsibilities_2 = parse_job_c_output(job_c_output)
 
-        skills_match_output = generate_skills_match(skills_raw, job_b)
+        skills_match_output = generate_skills_match(skills_raw, job_1_duties, job_2_duties, job_b)
         match_percentage, direct_matches, transferable_skills, real_gaps = parse_skills_match_output(skills_match_output)
 
         # Add the AI generated results to the context
