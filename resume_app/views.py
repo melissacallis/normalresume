@@ -4,7 +4,6 @@ import os
 import io
 from django.shortcuts import render
 from django.http import HttpResponse, FileResponse
-from google.generativeai import configure, GenerativeModel
 from .forms import JobDescriptionForm
 
 from PyPDF2 import PdfReader, PdfWriter
@@ -22,14 +21,13 @@ from dotenv import load_dotenv
 
 load_dotenv()  # this reads .env into os.environ
 
-API_KEY = os.getenv("GOOGLE_API_KEY")
+API_KEY = os.getenv("GROQ_API_KEY")
 if not API_KEY:
-    raise RuntimeError("GOOGLE_API_KEY not set in environment")
+    raise RuntimeError("GROQ_API_KEY not set in environment")
 
-# Use client-based initialization instead of genai.configure
-from google import genai
-client = genai.Client(api_key=API_KEY)
-model = client.models.get(model="gemini-2.5-flash")
+from groq import Groq
+client = Groq(api_key=API_KEY)
+GROQ_MODEL = "llama-3.3-70b-versatile"
 
 
 def generate_job_c(job_1, job_2, target_job):
@@ -73,11 +71,11 @@ Strictly use this exact format with these exact headers:
 - [Job 2 bullet]
 """
 
-    response = client.models.generate_content(
-        model="gemini-2.5-flash",
-        contents=prompt
+    response = client.chat.completions.create(
+        model=GROQ_MODEL,
+        messages=[{"role": "user", "content": prompt}],
     )
-    return response.text
+    return response.choices[0].message.content
 
 def generate_skills_match(skills, target_job):
     prompt = f"""
@@ -111,11 +109,11 @@ Strictly use this exact format with these exact headers:
 - [gap]
 """
 
-    response = client.models.generate_content(
-        model="gemini-2.5-flash",
-        contents=prompt
+    response = client.chat.completions.create(
+        model=GROQ_MODEL,
+        messages=[{"role": "user", "content": prompt}],
     )
-    return response.text
+    return response.choices[0].message.content
 
 def parse_skills_match_output(skills_match_output):
     if not skills_match_output:
