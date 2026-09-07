@@ -1,8 +1,6 @@
-from django.shortcuts import render
-
 import os
 import io
-from django.shortcuts import render
+from django.shortcuts import render, redirect
 from django.http import HttpResponse, FileResponse
 from google.generativeai import configure, GenerativeModel
 from .forms import JobDescriptionForm
@@ -10,7 +8,6 @@ from .forms import JobDescriptionForm
 from PyPDF2 import PdfReader, PdfWriter
 from reportlab.pdfgen import canvas
 from reportlab.lib.pagesizes import letter
-from django.views.decorators.csrf import csrf_exempt
 from django.templatetags.static import static
 from weasyprint import HTML, CSS
 
@@ -29,7 +26,6 @@ if not API_KEY:
 # Use client-based initialization instead of genai.configure
 from google import genai
 client = genai.Client(api_key=API_KEY)
-model = client.models.get(model="gemini-2.5-flash")
 
 
 def generate_job_c(job_1, job_2, target_job):
@@ -104,7 +100,6 @@ def parse_job_c_output(job_c_output):
         
     return professional_summary, responsibilities_1, responsibilities_2
 
-@csrf_exempt
 def home(request):
     if request.method == 'POST':
         # Prepare context with standard fields AND the new Job 1 and Job 2 fields
@@ -135,8 +130,12 @@ def home(request):
         job_b = request.POST.get('job_b', '')
 
         # Generate the AI content
-        job_c_output = generate_job_c(job_1_duties, job_2_duties, job_b)
-        professional_summary, responsibilities_1, responsibilities_2 = parse_job_c_output(job_c_output)
+        try:
+            job_c_output = generate_job_c(job_1_duties, job_2_duties, job_b)
+            professional_summary, responsibilities_1, responsibilities_2 = parse_job_c_output(job_c_output)
+        except Exception:
+            professional_summary = "AI generation is temporarily unavailable. Please try again shortly."
+            responsibilities_1, responsibilities_2 = [], []
 
         # Add the AI generated results to the context
         context['professional_summary'] = professional_summary
@@ -147,7 +146,6 @@ def home(request):
 
     return render(request, 'resume_app/home.html')
 
-@csrf_exempt
 def generate_pdf(request):
     if request.method == 'POST':
         context = {
@@ -182,7 +180,6 @@ def generate_pdf(request):
 
     return redirect('home')
 
-@csrf_exempt
 def load_edit_resume(request):
     if request.method == 'POST':
         context = {

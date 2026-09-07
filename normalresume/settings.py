@@ -16,8 +16,6 @@ from dotenv import load_dotenv
 
 load_dotenv()  # load environment variables from .env
 
-GEMINI_API_KEY = os.getenv("GEMINI_API_KEY")
-
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
 
@@ -26,12 +24,14 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 # See https://docs.djangoproject.com/en/5.2/howto/deployment/checklist/
 
 # SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = "django-insecure-g+fy8y$+%c-r3rq77s@47juso@2f(c*e_9y(_0(tjp9h_o_uhu"
+SECRET_KEY = os.environ.get(
+    "SECRET_KEY", "django-insecure-g+fy8y$+%c-r3rq77s@47juso@2f(c*e_9y(_0(tjp9h_o_uhu"
+)
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True
+DEBUG = False
 
-ALLOWED_HOSTS = ["*", ".herokuapp.com"]
+ALLOWED_HOSTS = [".herokuapp.com", "127.0.0.1", "localhost"]
 
 
 # Application definition

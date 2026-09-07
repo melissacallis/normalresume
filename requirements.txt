@@ -8,9 +8,7 @@ cffi==1.17.1
 chardet==5.2.0
 charset-normalizer==3.4.1
 cssselect2==0.7.0
-dj-database-url==2.3.0
 Django==5.2.3
-django-heroku==0.3.1
 fonttools==4.55.3
 google-ai-generativelanguage==0.6.10
 google-api-core==2.24.0
@@ -32,7 +30,6 @@ packaging==24.2
 pillow==11.0.0
 proto-plus==1.25.0
 protobuf==5.29.2
-psycopg2==2.9.10
 pyasn1==0.6.1
 pyasn1_modules==0.4.1
 pycparser==2.22
